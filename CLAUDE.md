@@ -100,10 +100,30 @@ Every function that does I/O (DB query, HTTP call, cache read/write) must accept
 - Never write a repo interface method without `ctx` — it cannot be cancelled, traced, or timed out.
 
 ### 14. Post-iteration summary
-After every code change prompted by the user, provide a brief summary:
-- What files/functions were changed
-- Why each change was made
-This keeps the user informed and creates an audit trail within the conversation.
+After every code change prompted by the user, provide:
+1. **What changed** — files and functions modified, and why
+2. **Code walkthrough** — walk through the full implementation end-to-end: entry point → handler → service → repo, explaining what each layer does and how they connect
+3. **How to run** — exact commands to run the server/app and execute all test cases
+
+Example format:
+```
+## Walkthrough
+- `cmd/server/main.go` — starts the HTTP server, wires dependencies
+- `internal/handler/user.go` — receives request, validates input, calls service
+- `internal/service/user.go` — applies business logic, calls repo
+- `internal/repo/user.go` — reads/writes from in-memory store
+
+## Run
+cd <project-name>
+go run cmd/server/main.go
+
+## Tests
+cd <project-name>
+go test ./...                    # summary output
+go test ./... -count=1 -v        # detailed per-test output (bypasses cache)
+```
+
+**Important:** This repo is a mono-repo. Each project has its own `go.mod`. Always prefix run/test commands with `cd <project-name>`. Never instruct the user to run Go commands from the repo root.
 
 ## Quick Commands
 
